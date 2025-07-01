@@ -1,0 +1,389 @@
+openapi: 3.0.0
+info:
+  description: 会员系统前后端分离接口文档
+  title: 会员系统 API
+  version: 1.0.0
+servers:
+- url: http://localhost:8000
+tags:
+- name: 用户
+- name: 会员
+- name: 卡密
+- name: 通知
+- name: 管理后台
+paths:
+  /api/register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_register_post_request"
+        required: true
+      responses:
+        "200":
+          description: 注册成功
+        "400":
+          description: 参数错误或邮箱已注册
+      summary: 用户注册
+      tags:
+      - 用户
+  /api/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_register_post_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_api_login_post_200_response"
+          description: 登录成功
+        "401":
+          description: 登录失败
+      summary: 用户登录
+      tags:
+      - 用户
+  /api/membership:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_api_membership_get_200_response"
+          description: 会员信息
+      security:
+      - bearerAuth: []
+      summary: 获取当前用户会员信息
+      tags:
+      - 会员
+  /api/redeem:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_redeem_post_request"
+        required: true
+      responses:
+        "200":
+          description: 兑换结果
+        "400":
+          description: 卡密无效或已使用
+      security:
+      - bearerAuth: []
+      summary: 卡密兑换/续费
+      tags:
+      - 卡密
+  /api/profile:
+    get:
+      responses:
+        "200":
+          description: 个人信息
+      security:
+      - bearerAuth: []
+      summary: 获取个人信息
+      tags:
+      - 用户
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_profile_put_request"
+        required: true
+      responses:
+        "200":
+          description: 修改成功
+      security:
+      - bearerAuth: []
+      summary: 修改个人信息
+      tags:
+      - 用户
+  /api/notifications:
+    get:
+      responses:
+        "200":
+          description: 通知列表
+      security:
+      - bearerAuth: []
+      summary: 获取系统通知列表
+      tags:
+      - 通知
+  /api/notifications/{id}/read:
+    put:
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: 标记成功
+      security:
+      - bearerAuth: []
+      summary: 标记通知为已读
+      tags:
+      - 通知
+  /api/admin/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_admin_login_post_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_api_login_post_200_response"
+          description: 登录成功
+        "401":
+          description: 登录失败
+      summary: 管理员登录
+      tags:
+      - 管理后台
+  /api/admin/card-codes:
+    get:
+      responses:
+        "200":
+          description: 卡密列表
+      security:
+      - bearerAuth: []
+      summary: 查询卡密列表
+      tags:
+      - 管理后台
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_admin_card_codes_post_request"
+        required: true
+      responses:
+        "200":
+          description: 生成的卡密列表
+      security:
+      - bearerAuth: []
+      summary: 批量生成卡密
+      tags:
+      - 管理后台
+  /api/admin/card-codes/{code}/logs:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: code
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: 使用记录
+      security:
+      - bearerAuth: []
+      summary: 查询某个卡密的使用记录
+      tags:
+      - 管理后台
+  /api/admin/memberships:
+    get:
+      responses:
+        "200":
+          description: 会员列表
+      security:
+      - bearerAuth: []
+      summary: 查询会员列表
+      tags:
+      - 管理后台
+  /api/admin/memberships/{user_id}:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: 会员详情
+      security:
+      - bearerAuth: []
+      summary: 查询某个用户的会员详情
+      tags:
+      - 管理后台
+  /api/admin/memberships/{user_id}/renew:
+    post:
+      parameters:
+      - explode: false
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_api_admin_memberships__user_id__renew_post_request"
+        required: true
+      responses:
+        "200":
+          description: 续费成功
+      security:
+      - bearerAuth: []
+      summary: 管理员手动为用户续费/调整会员
+      tags:
+      - 管理后台
+  /api/admin/statistics:
+    get:
+      responses:
+        "200":
+          description: 统计数据
+      security:
+      - bearerAuth: []
+      summary: 获取数据统计
+      tags:
+      - 管理后台
+components:
+  schemas:
+    _api_login_post_200_response:
+      example:
+        token: token
+      properties:
+        token:
+          title: token
+          type: string
+      title: _api_login_post_200_response
+      type: object
+    _api_membership_get_200_response_local:
+      example:
+        expire_at: 2025-01-01T00:00:00Z
+      properties:
+        expire_at:
+          example: 2025-01-01T00:00:00Z
+          format: date-time
+          title: expire_at
+          type: string
+      title: _api_membership_get_200_response_local
+      type: object
+    _api_membership_get_200_response_online:
+      example:
+        storage_total: 20
+        expire_at: 2025-01-01T00:00:00Z
+      properties:
+        expire_at:
+          example: 2025-01-01T00:00:00Z
+          format: date-time
+          title: expire_at
+          type: string
+        storage_total:
+          example: 20
+          title: storage_total
+          type: integer
+      title: _api_membership_get_200_response_online
+      type: object
+    _api_profile_put_request:
+      properties:
+        password:
+          example: newpassword123
+          title: password
+          type: string
+      title: _api_profile_put_request
+      type: object
+    _api_admin_card_codes_post_request:
+      properties:
+        count:
+          example: 10
+          title: count
+          type: integer
+        type:
+          example: both
+          title: type
+          type: string
+        value:
+          example: 365
+          title: value
+          type: integer
+      title: _api_admin_card_codes_post_request
+      type: object
+    _api_register_post_request:
+      properties:
+        email:
+          example: user@example.com
+          title: email
+          type: string
+        password:
+          example: password123
+          title: password
+          type: string
+      title: _api_register_post_request
+      type: object
+    _api_admin_memberships__user_id__renew_post_request:
+      properties:
+        type:
+          example: online
+          title: type
+          type: string
+        months:
+          example: 12
+          title: months
+          type: integer
+        storage:
+          example: 10
+          title: storage
+          type: integer
+      title: _api_admin_memberships__user_id__renew_post_request
+      type: object
+    _api_membership_get_200_response:
+      example:
+        online:
+          storage_total: 20
+          expire_at: 2025-01-01T00:00:00Z
+        local:
+          expire_at: 2025-01-01T00:00:00Z
+      properties:
+        local:
+          $ref: "#/components/schemas/_api_membership_get_200_response_local"
+        online:
+          $ref: "#/components/schemas/_api_membership_get_200_response_online"
+      title: _api_membership_get_200_response
+      type: object
+    _api_admin_login_post_request:
+      properties:
+        username:
+          example: admin
+          title: username
+          type: string
+        password:
+          example: admin123
+          title: password
+          type: string
+      title: _api_admin_login_post_request
+      type: object
+    _api_redeem_post_request:
+      properties:
+        code:
+          example: ABCD1234
+          title: code
+          type: string
+      title: _api_redeem_post_request
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

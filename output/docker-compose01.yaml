@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  vip-backend:
+    build: .
+    container_name: vip-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../test.db:/app/test.db
+     
+    environment:
+      - PYTHONPATH=src
+    restart: unless-stopped 
